@@ -1,7 +1,7 @@
-h_tube = 25;
-d_tube = 10;
+h_tube = 20;
+d_tube = 9.0;
 r_round = 2;
-wall_thickness = 1.5;
+wall_thickness = 1.3;
 r_round_wall = wall_thickness/2;
 h_cyl = h_tube - r_round_wall;
 
@@ -12,6 +12,26 @@ len_srew = d_tube + 4;
 d_groove = d_tube/2 + 2.2;
 r_round_groove = 3;
 width_screw = 3;
+h_base = 1.8;
+
+translate([0, 0, -20])
+set_tube();
+// washer_base();
+
+module set_tube() {
+  color("lime")
+  spiral_quadro1();
+  tube();
+  translate([0, 0, -h_base/2])
+  washer_base();
+}
+
+module washer_base() {
+  difference() {
+    cylinder(d=18, h=h_base, center=true, $fn=64);
+    cylinder(d=d_tube-2*wall_thickness, h=5, center=true, $fn=64);
+  }
+}
 
 // cube(7-0.5, true);
 module tor() {
@@ -87,17 +107,6 @@ module tube_grooved() {
     }
 }
 
-module washer_base() {
-  difference() {
-    cylinder(d=18, h=2.5, center=true, $fn=64);
-    cylinder(d=d_tube-2*wall_thickness, h=5, center=true, $fn=64);
-    translate([0, 0, -2.5/2-0.1])
-    rotate_extrude($fn = 64)
-    translate([(d_tube-2*wall_thickness)/2-0.1, 0, 0])
-    section();
-    
-  }
-}
 
 module rect_screw(){
   width_screw = 1;
@@ -111,42 +120,48 @@ module rect_screw(){
 
 module spiral_quadro1() {
   
+  linear_extrude(height=h_tube-5*r_round_wall, twist=720, $fn=100, slices=300)
+  section_spiral();
+}
+
+module section_spiral() {
   sqrt2 = sqrt(2);
   echo(sqrt2);
-  linear_extrude(height=h_tube-r_round_wall, twist=720, $fn=100, slices=300)
+  delta = 0.7;
+  d_screw = d_tube/2/sqrt2 - 0.0-delta;
 
-  
   intersection() {  
     union() {
-      translate([-d_tube/2/sqrt2, -d_tube/2/sqrt2])
+      translate([-d_screw, -d_screw])
       square(width_screw, true);
       mirror([1, 0])
-      translate([-d_tube/2/sqrt2, -d_tube/2/sqrt2])
+      translate([-d_screw, -d_screw])
       square(width_screw, true);
       mirror([0, 1])
-      translate([-d_tube/2/sqrt2, -d_tube/2/sqrt2])
+      translate([-d_screw, -d_screw])
       square(width_screw, true);
       mirror([1, 1])
-      translate([-d_tube/2/sqrt2, -d_tube/2/sqrt2])
+      translate([-d_screw, -d_screw])
       square(width_screw, true);
     }
     difference() {   
-      circle(d=d_tube+0.5*width_screw*sqrt2);
-      circle(d=d_tube - 2*wall_thickness + 0.1);
+      circle(d=d_tube+0.5*width_screw*sqrt2-delta*sqrt2, $fn=32);
+      circle(d=d_tube-2*wall_thickness*sqrt2+0.4+delta*sqrt2, $fn=32);
     }
   }
 }
 
 
+//section_spiral();
 //translate([0, 0, -25])
-color("lime")
-spiral_quadro1();
+//color("lime")
+//spiral_quadro1();
 //base2();
 //rect_screw();
 //translate([0, 0, -25])
-tube();
-translate([0, 0, -2.5/2])
-washer_base();
+//tube();
+//translate([0, 0, -2.5/2])
+//washer_base();
 //tube_grooved();
 //tube_holed();
 //translate([0, 0, 0])
